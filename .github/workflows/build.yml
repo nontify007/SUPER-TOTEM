@@ -28,15 +28,15 @@ jobs:
         run: |
           ./gradlew genSources --no-daemon || true
           echo "===== SEARCHING FOR SOURCES JAR ====="
-          CANDIDATES=$(find / -iname "*sources*.jar" 2>/dev/null)
+          CANDIDATES=$(find / -iname "*sources*.jar" 2>/dev/null || true)
           echo "$CANDIDATES"
           FOUND=0
           for j in $CANDIDATES; do
             if unzip -l "$j" 2>/dev/null | grep -q "MultiPlayerGameMode.java"; then
               echo "===== FOUND IN JAR: $j ====="
-              PATH_IN_JAR=$(unzip -l "$j" | grep "MultiPlayerGameMode.java" | awk '{print $NF}')
+              PATH_IN_JAR=$(unzip -l "$j" 2>/dev/null | grep "MultiPlayerGameMode.java" | awk '{print $NF}')
               echo "===== PATH: $PATH_IN_JAR ====="
-              unzip -p "$j" "$PATH_IN_JAR"
+              unzip -p "$j" "$PATH_IN_JAR" || true
               FOUND=1
               break
             fi
