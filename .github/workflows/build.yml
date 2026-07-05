@@ -27,9 +27,23 @@ jobs:
       - name: Debug and Build
         run: |
           ./gradlew genSources --no-daemon || true
-          FILE=$(find / -iname "MultiPlayerGameMode.java" 2>/dev/null | head -1)
-          echo "===== FOUND FILE: $FILE ====="
-          if [ -n "$FILE" ]; then cat "$FILE"; else echo "NOT FOUND"; fi
+          echo "===== SEARCHING FOR SOURCES JAR ====="
+          CANDIDATES=$(find / -iname "*sources*.jar" 2>/dev/null)
+          echo "$CANDIDATES"
+          FOUND=0
+          for j in $CANDIDATES; do
+            if unzip -l "$j" 2>/dev/null | grep -q "MultiPlayerGameMode.java"; then
+              echo "===== FOUND IN JAR: $j ====="
+              PATH_IN_JAR=$(unzip -l "$j" | grep "MultiPlayerGameMode.java" | awk '{print $NF}')
+              echo "===== PATH: $PATH_IN_JAR ====="
+              unzip -p "$j" "$PATH_IN_JAR"
+              FOUND=1
+              break
+            fi
+          done
+          if [ "$FOUND" -eq 0 ]; then
+            echo "STILL NOT FOUND"
+          fi
           echo "===== NOW BUILDING ====="
           ./gradlew build --no-daemon
 
