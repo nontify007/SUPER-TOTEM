@@ -24,15 +24,14 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Debug - find real method names
+      - name: Debug and Build
         run: |
           ./gradlew genSources --no-daemon || true
           FILE=$(find / -iname "MultiPlayerGameMode.java" 2>/dev/null | head -1)
           echo "===== FOUND FILE: $FILE ====="
           if [ -n "$FILE" ]; then cat "$FILE"; else echo "NOT FOUND"; fi
-
-      - name: Build with Gradle Wrapper
-        run: ./gradlew build --no-daemon
+          echo "===== NOW BUILDING ====="
+          ./gradlew build --no-daemon
 
       - name: Upload built jar
         uses: actions/upload-artifact@v4
